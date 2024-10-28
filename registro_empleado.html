@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Registro de Empleado - SERVIEXPRESS</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>SERVIEXPRESS</h1>
+            <button class="nav-toggle">☰ Menu</button>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="registro_clientes.html">Registro de Clientes</a></li>
+                    <li><a href="registro_reserva.html">Registro de Reserva</a></li>
+                    <li><a href="registro_proveedor.html">Registro de Proveedor</a></li>
+                    <li><a href="registro_factura.html">Registro de Factura</a></li>
+                    <li><a href="registro_empleado.html">Registro de Empleado</a></li>
+                    <li><a href="registro_servicios.html">Registro de Servicios</a></li>
+                    <li><a href="registro_orden_pedido.html">Registro de Orden de Pedido</a></li>
+                    <li><a href="registro_recepcion_producto.html">Registro de Recepción de Producto</a></li>
+                    <li><a href="informes.html">Informes y Estadísticas</a></li>
+                    <li><a href="administrador.html">Administrador</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Registro de Empleado</h2>
+        <form id="empleado-form">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" required>
+            <label for="puesto">Puesto:</label>
+            <input type="text" id="puesto" required>
+            <label for="correo-electronico">Correo Electrónico:</label>
+            <input type="email" id="correo-electronico" required>
+            <label for="telefono">Teléfono:</label>
+            <input type="tel" id="telefono" required>
+            <label for="direccion">Dirección:</label>
+            <input type="text" id="direccion" required>
+            <button type="submit">Registrar Empleado</button>
+            <button type="button" id="cancelar">Cancelar</button>
+        </form>
+
+        <h3>Lista de Empleados Registrados</h3>
+        <ul id="lista-empleados"></ul>
+    </div>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('nav ul');
+        const empleadoForm = document.getElementById('empleado-form');
+        const listaEmpleados = document.getElementById('lista-empleados');
+        let empleados = JSON.parse(localStorage.getItem('empleados')) || [];
+        let editIndex = -1;
+
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('DOMContentLoaded', cargarEmpleados);
+
+        empleadoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const puesto = document.getElementById('puesto').value;
+            const correoElectronico = document.getElementById('correo-electronico').value;
+            const telefono = document.getElementById('telefono').value;
+            const direccion = document.getElementById('direccion').value;
+
+            const empleado = { nombre, puesto, correoElectronico, telefono, direccion };
+
+            if (editIndex >= 0) {
+                empleados[editIndex] = empleado;
+                editIndex = -1;
+            } else {
+                empleados.push(empleado);
+            }
+
+            guardarEmpleados();
+            mostrarEmpleados();
+            empleadoForm.reset();
+        });
+
+        function guardarEmpleados() {
+            localStorage.setItem('empleados', JSON.stringify(empleados));
+        }
+
+        function mostrarEmpleados() {
+            listaEmpleados.innerHTML = '';
+            empleados.forEach((empleado, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `Nombre: ${empleado.nombre}, Puesto: ${empleado.puesto}, Correo Electrónico: ${empleado.correoElectronico}, Teléfono: ${empleado.telefono}, Dirección: ${empleado.direccion} 
+                    <button onclick="editarEmpleado(${index})">Editar</button>
+                    <button onclick="eliminarEmpleado(${index})">Eliminar</button>`;
+                listaEmpleados.appendChild(li);
+            });
+        }
+
+        function cargarEmpleados() {
+            mostrarEmpleados();
+        }
+
+        function editarEmpleado(index) {
+            editIndex = index;
+            const empleado = empleados[index];
+            document.getElementById('nombre').value = empleado.nombre;
+            document.getElementById('puesto').value = empleado.puesto;
+            document.getElementById('correo-electronico').value = empleado.correoElectronico;
+            document.getElementById('telefono').value = empleado.telefono;
+            document.getElementById('direccion').value = empleado.direccion;
+        }
+
+        function eliminarEmpleado(index) {
+            empleados.splice(index, 1);
+            guardarEmpleados();
+            mostrarEmpleados();
+        }
+    </script>
+</body>
+</html>

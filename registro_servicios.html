@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Registro de Servicios - SERVIEXPRESS</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>SERVIEXPRESS</h1>
+            <button class="nav-toggle">☰ Menu</button>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="registro_clientes.html">Registro de Clientes</a></li>
+                    <li><a href="registro_reserva.html">Registro de Reserva</a></li>
+                    <li><a href="registro_proveedor.html">Registro de Proveedor</a></li>
+                    <li><a href="registro_factura.html">Registro de Factura</a></li>
+                    <li><a href="registro_empleado.html">Registro de Empleado</a></li>
+                    <li><a href="registro_servicios.html">Registro de Servicios</a></li>
+                    <li><a href="registro_orden_pedido.html">Registro de Orden de Pedido</a></li>
+                    <li><a href="registro_recepcion_producto.html">Registro de Recepción de Producto</a></li>
+                    <li><a href="informes.html">Informes y Estadísticas</a></li>
+                    <li><a href="administrador.html">Administrador</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Registro de Servicios</h2>
+        <form id="servicio-form">
+            <label for="nombre">Nombre del Servicio:</label>
+            <input type="text" id="nombre" required>
+            <label for="precio">Precio:</label>
+            <input type="number" id="precio" required>
+            <label for="descripcion">Descripción:</label>
+            <textarea id="descripcion" required></textarea>
+            <label for="duracion">Duración (en minutos):</label>
+            <input type="number" id="duracion" required>
+            <button type="submit">Registrar Servicio</button>
+            <button type="button" id="cancelar">Cancelar</button>
+        </form>
+
+        <h3>Lista de Servicios Registrados</h3>
+        <ul id="lista-servicios"></ul>
+    </div>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('nav ul');
+        const servicioForm = document.getElementById('servicio-form');
+        const listaServicios = document.getElementById('lista-servicios');
+        let editIndex = -1;
+
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('DOMContentLoaded', cargarServicios);
+
+        servicioForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const precio = document.getElementById('precio').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const duracion = document.getElementById('duracion').value;
+
+            const servicio = { nombre, precio, descripcion, duracion };
+
+            if (editIndex >= 0) {
+                actualizarServicio(servicio);
+            } else {
+                guardarServicio(servicio);
+            }
+
+            mostrarServicios();
+            servicioForm.reset();
+            editIndex = -1; // Reset edit index
+        });
+
+        function guardarServicio(servicio) {
+            let servicios = JSON.parse(localStorage.getItem('servicios')) || [];
+            servicios.push(servicio);
+            localStorage.setItem('servicios', JSON.stringify(servicios));
+        }
+
+        function actualizarServicio(servicio) {
+            let servicios = JSON.parse(localStorage.getItem('servicios')) || [];
+            servicios[editIndex] = servicio;
+            localStorage.setItem('servicios', JSON.stringify(servicios));
+        }
+
+        function mostrarServicios() {
+            const servicios = JSON.parse(localStorage.getItem('servicios')) || [];
+            listaServicios.innerHTML = '';
+            servicios.forEach((servicio, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `Nombre: ${servicio.nombre}, Precio: ${servicio.precio}, Descripción: ${servicio.descripcion}, Duración: ${servicio.duracion} min 
+                    <button onclick="editarServicio(${index})">Editar</button>
+                    <button onclick="eliminarServicio(${index})">Eliminar</button>`;
+                listaServicios.appendChild(li);
+            });
+        }
+
+        function cargarServicios() {
+            mostrarServicios();
+        }
+
+        function editarServicio(index) {
+            editIndex = index;
+            const servicios = JSON.parse(localStorage.getItem('servicios'));
+            const servicio = servicios[index];
+
+            document.getElementById('nombre').value = servicio.nombre;
+            document.getElementById('precio').value = servicio.precio;
+            document.getElementById('descripcion').value = servicio.descripcion;
+            document.getElementById('duracion').value = servicio.duracion;
+        }
+
+        function eliminarServicio(index) {
+            let servicios = JSON.parse(localStorage.getItem('servicios')) || [];
+            servicios.splice(index, 1);
+            localStorage.setItem('servicios', JSON.stringify(servicios));
+            mostrarServicios();
+        }
+    </script>
+</body>
+</html>

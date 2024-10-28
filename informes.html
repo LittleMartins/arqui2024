@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Informes y Estadísticas - SERVIEXPRESS</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>SERVIEXPRESS</h1>
+            <button class="nav-toggle">☰ Menu</button>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="registro_clientes.html">Registro de Clientes</a></li>
+                    <li><a href="registro_reserva.html">Registro de Reserva</a></li>
+                    <li><a href="registro_proveedor.html">Registro de Proveedor</a></li>
+                    <li><a href="registro_factura.html">Registro de Factura</a></li>
+                    <li><a href="registro_empleado.html">Registro de Empleado</a></li>
+                    <li><a href="registro_servicios.html">Registro de Servicios</a></li>
+                    <li><a href="registro_orden_pedido.html">Registro de Orden de Pedido</a></li>
+                    <li><a href="registro_recepcion_producto.html">Registro de Recepción de Producto</a></li>
+                    <li><a href="informes.html">Informes y Estadísticas</a></li>
+                    <li><a href="administrador.html">Administrador</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2>Informes y Estadísticas</h2>
+        <p>En esta sección podrás visualizar informes y estadísticas sobre el rendimiento y actividades de SERVIEXPRESS.</p>
+
+        <div class="grid">
+            <div class="grid-item">
+                <h3>Informe de Registro de Clientes</h3>
+                <button onclick="generatePDF('clientes')">Generar PDF</button>
+            
+            </div>
+            <div class="grid-item">
+                <h3>Informe de Registro de Reservas</h3>
+                <button onclick="generatePDF('reservas')">Generar PDF</button>
+         
+            </div>
+            <div class="grid-item">
+                <h3>Informe de Registro de Proveedores</h3>
+                <button onclick="generatePDF('proveedores')">Generar PDF</button>
+              
+            </div>
+            <div class="grid-item">
+                <h3>Informe de Registro de Facturas</h3>
+                <button onclick="generatePDF('facturas')">Generar PDF</button>
+                
+            </div>
+            <div class="grid-item">
+                <h3>Informe de Registro de Empleados</h3>
+                <button onclick="generatePDF('empleados')">Generar PDF</button>
+            </div>
+            <div class="grid-item">
+                <h3>Informe de Registro de Servicios</h3>
+                <button onclick="generatePDF('servicios')">Generar PDF</button>
+     
+            </div>
+            <div class="grid-item">
+                <h3>Informe de Registro de Órdenes de Pedido</h3>
+                <button onclick="generatePDF('ordenes')">Generar PDF</button>
+
+            </div>
+            <div class="grid-item">
+                <h3>Informe de Registro de Recepción de Productos</h3>
+                <button onclick="generatePDF('recepcion')">Generar PDF</button>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script>
+        function getLocalStorageData(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : [];
+        }
+    
+        function displayReport(category) {
+            const reportDiv = document.getElementById(`${category}-report`);
+            const items = getLocalStorageData(category);
+            
+            reportDiv.innerHTML = `<h4>Listado de ${category.charAt(0).toUpperCase() + category.slice(1)}</h4>`;
+            if (items.length === 0) {
+                reportDiv.innerHTML += "<p>No hay datos disponibles.</p>";
+            } else {
+                items.forEach(item => {
+                    reportDiv.innerHTML += `<p>${JSON.stringify(item)}</p>`;
+                });
+            }
+        }
+    
+        async function generatePDF(category) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const items = getLocalStorageData(category);
+    doc.setFontSize(22);
+    doc.setFont("Helvetica", "bold");
+    doc.text("Taller Mecánico SERVIEXPRESS", 10, 10);
+    doc.setFontSize(18);
+    doc.setFont("Helvetica", "normal");
+    doc.text(`Informe de Registro de ${category.charAt(0).toUpperCase() + category.slice(1)}`, 10, 20);
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+
+    const date = new Date().toLocaleDateString();
+    doc.text(`Fecha: ${date}`, 10, 30);
+    
+    let y = 40;
+    const columnHeaders = Object.keys(items[0]);
+    const columnWidth = 50; // Aumenta el ancho de las columnas
+    const rowHeight = 15; // Altura para más espacio entre filas
+
+    // Encabezados de la tabla
+    doc.setFillColor(220, 220, 220);
+    doc.rect(10, y - 10, columnWidth * columnHeaders.length, 10, 'F');
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    columnHeaders.forEach((header, index) => {
+        doc.text(header, 10 + (index * columnWidth), y);
+    });
+    y += 15; // Espaciado aumentado
+
+    // Datos de la tabla
+    doc.setFontSize(12);
+    doc.setTextColor(50);
+    items.forEach(item => {
+        columnHeaders.forEach((header, index) => {
+            const value = item[header] ? item[header].toString() : ''; // Maneja valores indefinidos
+            doc.text(value, 10 + (index * columnWidth), y); // Alínea el texto
+        });
+        y += rowHeight; // Espacio entre filas
+    });
+
+    // Pie de página
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.page = i;
+        doc.setFontSize(10);
+        doc.text(`Página ${i} de ${pageCount}`, 10, doc.internal.pageSize.height - 10);
+    }
+
+    doc.save(`informe_${category}.pdf`);
+}
+
+    
+        window.onload = () => {
+            const categories = ['clientes', 'reservas', 'proveedores', 'facturas', 'empleados', 'servicios', 'ordenes', 'recepcion'];
+            categories.forEach(displayReport);
+        };
+    </script>
+    
+        
+    
+    
+</body>
+</html>

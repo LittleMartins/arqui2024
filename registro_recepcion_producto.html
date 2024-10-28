@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Registro de Recepción de Producto - SERVIEXPRESS</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>SERVIEXPRESS</h1>
+            <button class="nav-toggle">☰ Menu</button>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="registro_clientes.html">Registro de Clientes</a></li>
+                    <li><a href="registro_reserva.html">Registro de Reserva</a></li>
+                    <li><a href="registro_proveedor.html">Registro de Proveedor</a></li>
+                    <li><a href="registro_factura.html">Registro de Factura</a></li>
+                    <li><a href="registro_empleado.html">Registro de Empleado</a></li>
+                    <li><a href="registro_servicios.html">Registro de Servicios</a></li>
+                    <li><a href="registro_orden_pedido.html">Registro de Orden de Pedido</a></li>
+                    <li><a href="registro_recepcion_producto.html">Registro de Recepción de Producto</a></li>
+                    <li><a href="informes.html">Informes y Estadísticas</a></li>
+                    <li><a href="administrador.html">Administrador</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Registro de Recepción de Producto</h2>
+        <form id="recepcion-form">
+            <label for="proveedor">Proveedor:</label>
+            <input type="text" id="proveedor" required>
+            <label for="producto">Producto:</label>
+            <input type="text" id="producto" required>
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" id="cantidad" required>
+            <button type="submit">Registrar Recepción</button>
+        </form>
+
+        <h3>Lista de Recepciones Registradas</h3>
+        <ul id="lista-recepciones"></ul>
+    </div>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('nav ul');
+        const recepcionForm = document.getElementById('recepcion-form');
+        const listaRecepciones = document.getElementById('lista-recepciones');
+
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('DOMContentLoaded', cargarRecepciones);
+
+        recepcionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const proveedor = document.getElementById('proveedor').value;
+            const producto = document.getElementById('producto').value;
+            const cantidad = document.getElementById('cantidad').value;
+
+            const recepcion = { proveedor, producto, cantidad };
+            guardarRecepcion(recepcion);
+            mostrarRecepciones();
+            recepcionForm.reset();
+        });
+
+        function guardarRecepcion(recepcion) {
+            let recepciones = JSON.parse(localStorage.getItem('recepciones')) || [];
+            recepciones.push(recepcion);
+            localStorage.setItem('recepciones', JSON.stringify(recepciones));
+        }
+
+        function mostrarRecepciones() {
+            const recepciones = JSON.parse(localStorage.getItem('recepciones')) || [];
+            listaRecepciones.innerHTML = '';
+            recepciones.forEach(recepcion => {
+                const li = document.createElement('li');
+                li.textContent = `Proveedor: ${recepcion.proveedor}, Producto: ${recepcion.producto}, Cantidad: ${recepcion.cantidad}`;
+                listaRecepciones.appendChild(li);
+            });
+        }
+
+        function cargarRecepciones() {
+            mostrarRecepciones();
+        }
+    </script>
+</body>
+</html>

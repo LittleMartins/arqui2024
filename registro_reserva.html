@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Registro de Reserva - SERVIEXPRESS</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>SERVIEXPRESS</h1>
+            <button class="nav-toggle">☰ Menu</button>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="registro_clientes.html">Registro de Clientes</a></li>
+                    <li><a href="registro_reserva.html">Registro de Reserva</a></li>
+                    <li><a href="registro_proveedor.html">Registro de Proveedor</a></li>
+                    <li><a href="registro_factura.html">Registro de Factura</a></li>
+                    <li><a href="registro_empleado.html">Registro de Empleado</a></li>
+                    <li><a href="registro_servicios.html">Registro de Servicios</a></li>
+                    <li><a href="registro_orden_pedido.html">Registro de Orden de Pedido</a></li>
+                    <li><a href="registro_recepcion_producto.html">Registro de Recepción de Producto</a></li>
+                    <li><a href="informes.html">Informes y Estadísticas</a></li>
+                    <li><a href="administrador.html">Administrador</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Registro de Reserva</h2>
+        <form id="reserva-form">
+            <label for="cliente">Nombre y Apellido:</label>
+            <input type="text" id="cliente" required>
+            <label for="telefono">Teléfono:</label>
+            <input type="tel" id="telefono" required>
+            <label for="correo-electronico">Correo Electrónico:</label>
+            <input type="email" id="correo-electronico" required>
+            <label for="fecha-hora">Fecha y Hora:</label>
+            <input type="datetime-local" id="fecha-hora" required>
+            <label for="servicio">Servicio:</label>
+            <input type="text" id="servicio" required>
+            <button type="submit">Registrar Reserva</button>
+        </form>
+
+        <h3>Lista de Reservas Registradas</h3>
+        <ul id="lista-reservas"></ul>
+    </div>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('nav ul');
+        const reservaForm = document.getElementById('reserva-form');
+        const listaReservas = document.getElementById('lista-reservas');
+
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('DOMContentLoaded', cargarReservas);
+
+        reservaForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const cliente = document.getElementById('cliente').value;
+            const telefono = document.getElementById('telefono').value;
+            const correoElectronico = document.getElementById('correo-electronico').value;
+            const fechaHora = document.getElementById('fecha-hora').value;
+            const servicio = document.getElementById('servicio').value;
+            const estado = 'Por Confirmar'; // Default state
+
+            const reserva = { cliente, telefono, correoElectronico, fechaHora, servicio, estado };
+            guardarReserva(reserva);
+            mostrarReservas();
+            reservaForm.reset();
+        });
+
+        function guardarReserva(reserva) {
+            let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+            reservas.push(reserva);
+            localStorage.setItem('reservas', JSON.stringify(reservas));
+        }
+
+        function mostrarReservas() {
+            const reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+            listaReservas.innerHTML = '';
+            reservas.forEach((reserva, index) => {
+                const li = document.createElement('li');
+                li.textContent = `Cliente: ${reserva.cliente}, Teléfono: ${reserva.telefono}, Correo Electrónico: ${reserva.correoElectronico}, Fecha y Hora: ${new Date(reserva.fechaHora).toLocaleString()}, Servicio: ${reserva.servicio}, Estado: ${reserva.estado}`;
+                
+                // Create button to toggle reservation status
+                const estadoButton = document.createElement('button');
+                estadoButton.textContent = reserva.estado === 'Confirmada' ? 'Cambiar a Por Confirmar' : 'Cambiar a Confirmada';
+                estadoButton.onclick = () => cambiarEstado(index);
+
+                // Create buttons for Edit and Delete
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Editar';
+                editButton.onclick = () => editarReserva(index);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Eliminar';
+                deleteButton.onclick = () => eliminarReserva(index);
+
+                li.appendChild(estadoButton);
+                li.appendChild(editButton);
+                li.appendChild(deleteButton);
+                listaReservas.appendChild(li);
+            });
+        }
+
+        function cargarReservas() {
+            mostrarReservas();
+        }
+
+        function cambiarEstado(index) {
+            let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+            const reserva = reservas[index];
+            reserva.estado = reserva.estado === 'Confirmada' ? 'Por Confirmar' : 'Confirmada';
+            localStorage.setItem('reservas', JSON.stringify(reservas));
+            mostrarReservas();
+        }
+
+        function editarReserva(index) {
+            let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+            const reserva = reservas[index];
+
+            // Populate the form with the existing reservation details
+            document.getElementById('cliente').value = reserva.cliente;
+            document.getElementById('telefono').value = reserva.telefono;
+            document.getElementById('correo-electronico').value = reserva.correoElectronico;
+            document.getElementById('fecha-hora').value = reserva.fechaHora;
+            document.getElementById('servicio').value = reserva.servicio;
+
+            // Remove the existing reservation to avoid duplicates
+            reservas.splice(index, 1);
+            localStorage.setItem('reservas', JSON.stringify(reservas));
+            mostrarReservas();
+        }
+
+        function eliminarReserva(index) {
+            let reservas = JSON.parse(localStorage.getItem('reservas')) || [];
+            reservas.splice(index, 1);
+            localStorage.setItem('reservas', JSON.stringify(reservas));
+            mostrarReservas();
+        }
+    </script>
+</body>
+</html>
